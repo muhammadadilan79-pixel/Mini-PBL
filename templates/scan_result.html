@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div class="card">
+        <div class="card-header">
+            <h2>Scan Report</h2>
+            <a href="{{ url_for('index') }}" class="btn btn-sm"
+                style="background: rgba(255,255,255,0.05); color: var(--text-primary);">
+                &larr; Back to Dashboard
+            </a>
+        </div>
+
+        <div
+            style="text-align: center; margin-bottom: 3rem; padding: 2rem; background: rgba(0,0,0,0.2); border-radius: 12px;">
+            <div
+                style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.1em;">
+                Status</div>
+            <div class="status-badge status-{{ 'Changes' if 'Changes' in log['status'] else 'Clean' }}"
+                style="font-size: 1.25rem; padding: 0.5rem 1.5rem;">
+                {{ log['status'] }}
+            </div>
+            <div style="margin-top: 1rem; color: var(--text-secondary);">Scanned on {{ log['scan_time'] }}</div>
+        </div>
+
+        {% if details['added'] %}
+        <div class="result-group">
+            <div class="result-header text-success">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                New Files Detected ({{ details['added']|length }})
+            </div>
+            <div class="file-list">
+                {% for file in details['added'] %}
+                <div class="file-item">
+                    <span style="color: var(--success-color); font-weight: bold;">+</span>
+                    {{ file }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if details['modified'] %}
+        <div class="result-group">
+            <div class="result-header text-warning">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+                Modified Files ({{ details['modified']|length }})
+            </div>
+            <div class="file-list">
+                {% for file in details['modified'] %}
+                <div class="file-item">
+                    <span style="color: #fbbf24; font-weight: bold;">~</span>
+                    {{ file }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if details['deleted'] %}
+        <div class="result-group">
+            <div class="result-header text-danger">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Deleted Files ({{ details['deleted']|length }})
+            </div>
+            <div class="file-list">
+                {% for file in details['deleted'] %}
+                <div class="file-item">
+                    <span style="color: var(--danger-color); font-weight: bold;">-</span>
+                    {{ file }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not details['added'] and not details['modified'] and not details['deleted'] %}
+        <div style="text-align: center; padding: 3rem; color: var(--success-color);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="1.5" style="margin-bottom: 1rem; opacity: 0.8;">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3>Integrity Verified</h3>
+            <p style="color: var(--text-secondary);">No unauthorized changes detected.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

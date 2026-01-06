@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="dashboard-grid">
+    <!-- Main Content -->
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2" style="color: var(--accent-primary);">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    Monitored Paths
+                </h2>
+                <form action="{{ url_for('add_path') }}" method="POST" style="display: flex; gap: 0.75rem;">
+                    <input type="text" name="path" placeholder="/path/to/monitor" required>
+                    <button type="submit" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add
+                    </button>
+                </form>
+            </div>
+
+            {% if paths %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Path</th>
+                            <th>Added</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for path in paths %}
+                        <tr>
+                            <td style="font-family: 'JetBrains Mono', monospace; color: var(--accent-primary);">{{
+                                path['path'] }}</td>
+                            <td style="color: var(--text-secondary); font-size: 0.9rem;">{{ path['added_at'][:19] }}
+                            </td>
+                            <td style="text-align: right;">
+                                <div style="display: inline-flex; gap: 0.5rem;">
+                                    <a href="{{ url_for('scan', path_id=path['id']) }}" class="btn btn-primary btn-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                        Scan
+                                    </a>
+                                    <form action="{{ url_for('delete_path', path_id=path['id']) }}" method="POST"
+                                        style="display:inline;">
+                                        <button type="submit" class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Stop monitoring this path?')"
+                                            style="padding: 0.4rem;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div
+                style="text-align: center; padding: 4rem 2rem; color: var(--text-secondary); border: 2px dashed rgba(255,255,255,0.05); border-radius: 12px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="1" style="margin-bottom: 1rem; opacity: 0.5;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+                <p>No paths monitored yet.</p>
+                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Add a directory above to start tracking integrity.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sidebar / Recent Scans -->
+    <div>
+        <div class="card">
+            <div class="card-header" style="margin-bottom: 1.5rem;">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2" style="color: var(--text-secondary);">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Recent Activity
+                </h3>
+            </div>
+            {% if scans %}
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                {% for scan in scans %}
+                <div class="scan-item">
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem;">{{
+                            scan['scan_time'] }}</div>
+                        <div class="status-badge status-{{ 'Changes' if 'Changes' in scan['status'] else 'Clean' }}">
+                            {{ scan['status'] }}
+                        </div>
+                    </div>
+                    <a href="{{ url_for('view_log', log_id=scan['id']) }}"
+                        style="color: var(--accent-primary); padding: 0.5rem;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color: var(--text-secondary); text-align: center; font-size: 0.9rem;">No recent activity.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
